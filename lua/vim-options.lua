@@ -133,3 +133,38 @@ vim.cmd("set expandtab")
 vim.cmd("set tabstop=4")
 vim.cmd("set softtabstop=4")
 vim.cmd("set shiftwidth=4")
+
+-- Remap Ctrl-d to yank and paste
+vim.api.nvim_set_keymap("n", "<C-d>", ":normal! yy<CR>p", { noremap = true, silent = true })
+
+function replace_spaces_with_underscores()
+	-- Get the current line
+	local line = vim.api.nvim_get_current_line()
+	-- Find the position of "mod" and "{"
+	local start_pos = string.find(line, "mod")
+	local end_pos = string.find(line, " {")
+
+	if start_pos and end_pos then
+		-- Extract the text between "mod" and "{"
+		local before_mod = string.sub(line, 1, start_pos + 3) -- include space after "mod"
+		local between = string.sub(line, start_pos + 4, end_pos - 1)
+		local after_brace = string.sub(line, end_pos)
+
+		-- Replace spaces with underscores
+		local new_between = string.gsub(between, " ", "_")
+
+		-- Reconstruct the line
+		local new_line = before_mod .. new_between .. after_brace
+
+		-- Set the modified line
+		vim.api.nvim_set_current_line(new_line)
+	end
+end
+
+-- Define the keymap for normal mode
+vim.api.nvim_set_keymap(
+	"n",
+	"<leader>u",
+	":lua replace_spaces_with_underscores()<CR>",
+	{ noremap = true, silent = true }
+)
