@@ -15,6 +15,7 @@ return {
 		},
 		config = function()
 			-- vim.cmd.colorscheme("darcula-dark")
+			-- vim.cmd.hi("Comment gui=none")
 		end,
 	},
 	{

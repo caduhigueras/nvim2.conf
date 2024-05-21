@@ -121,9 +121,15 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.cmd([[
     augroup AutoSave
         autocmd!
-        autocmd CursorHold * silent! write
+        autocmd CursorHold * lua AutoSave()
     augroup END
 ]])
+
+function AutoSave()
+	if vim.bo.modified then
+		vim.cmd("silent! write")
+	end
+end
 
 -- Time in ms to trigger the autosave
 vim.o.updatetime = 5000
