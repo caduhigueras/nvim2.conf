@@ -175,3 +175,5 @@ vim.api.nvim_set_keymap(
 	":lua replace_spaces_with_underscores()<CR>",
 	{ noremap = true, silent = true }
 )
+
+vim.keymap.set("v", "<C-c>", '"+y', { desc = "Copy to clipboard on visual mode" })
