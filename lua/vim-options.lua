@@ -123,6 +123,7 @@ vim.cmd([[
     augroup AutoSave
         autocmd!
         autocmd CursorHold * lua AutoSave()
+        autocmd BufLeave * lua AutoSave()
     augroup END
 ]])
 
@@ -133,7 +134,7 @@ function AutoSave()
 end
 
 -- Time in ms to trigger the autosave
-vim.o.updatetime = 5000
+vim.o.updatetime = 2000
 
 -- Set my ideal tab Conf
 vim.cmd("set expandtab")
