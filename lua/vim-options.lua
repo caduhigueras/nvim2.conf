@@ -124,6 +124,7 @@ vim.cmd([[
         autocmd!
         autocmd CursorHold * lua AutoSave()
         autocmd BufLeave * lua AutoSave()
+        autocmd FocusLost * lua AutoSave()
     augroup END
 ]])
 
