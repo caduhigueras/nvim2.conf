@@ -42,14 +42,16 @@ return {
 			ensure_installed = {
 				-- Update this to ensure that you have the debuggers for the langs you want
 				"delve",
+				"js",
+				"codelldb", -- used for rust
 			},
 		})
 
 		-- Basic debugging keymaps, feel free to change to your liking!
-		vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Start/Continue" })
-		vim.keymap.set("n", "<F1>", dap.step_into, { desc = "Debug: Step Into" })
-		vim.keymap.set("n", "<F2>", dap.step_over, { desc = "Debug: Step Over" })
-		vim.keymap.set("n", "<F3>", dap.step_out, { desc = "Debug: Step Out" })
+		vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Start/Continue" }) --TODO: F9
+		vim.keymap.set("n", "<F1>", dap.step_into, { desc = "Debug: Step Into" }) --TODO: F7
+		vim.keymap.set("n", "<F2>", dap.step_over, { desc = "Debug: Step Over" }) --TODO: F8
+		vim.keymap.set("n", "<F3>", dap.step_out, { desc = "Debug: Step Out" }) --TODO: Shift + F8
 		vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
 		vim.keymap.set("n", "<leader>B", function()
 			dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
@@ -57,11 +59,13 @@ return {
 
 		-- Dap UI setup
 		-- For more information, see |:help nvim-dap-ui|
+		---@diagnostic disable-next-line: missing-fields
 		dapui.setup({
 			-- Set icons to characters that are more likely to work in every terminal.
 			--    Feel free to remove or use ones that you like more! :)
 			--    Don't feel like these are good choices.
 			icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
+			---@diagnostic disable-next-line: missing-fields
 			controls = {
 				icons = {
 					pause = "⏸",
@@ -92,5 +96,60 @@ return {
 				detached = vim.fn.has("win32") == 0,
 			},
 		})
+		---------------------------------------------------------------------------
+		-- NEW: NODE / JS / TS (using js-debug-adapter)
+		---------------------------------------------------------------------------
+		-- Mason puts `js-debug-adapter` in your PATH, so we can just call it
+		dap.adapters["pwa-node"] = {
+			type = "server",
+			host = "127.0.0.1",
+			port = "${port}",
+			executable = {
+				command = "js-debug-adapter",
+				args = { "${port}" },
+			},
+		}
+
+		-- You can extend this list with javascriptreact / typescriptreact if needed
+		for _, lang in ipairs({ "javascript", "typescript" }) do
+			dap.configurations[lang] = {
+				{
+					type = "pwa-node",
+					request = "launch",
+					name = "Launch file",
+					program = "${file}",
+					cwd = "${workspaceFolder}",
+					-- optional:
+					-- runtimeExecutable = "node",
+				},
+			}
+		end
+
+		---------------------------------------------------------------------------
+		-- NEW: RUST (using codelldb)
+		---------------------------------------------------------------------------
+		dap.adapters.codelldb = {
+			type = "server",
+			port = "${port}",
+			executable = {
+				-- Mason also puts `codelldb` in PATH by default
+				command = "codelldb",
+				args = { "--port", "${port}" },
+			},
+		}
+
+		dap.configurations.rust = {
+			{
+				name = "Debug current binary",
+				type = "codelldb",
+				request = "launch",
+				program = function()
+					-- by default, prompt in target/debug/
+					return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/target/debug/", "file")
+				end,
+				cwd = "${workspaceFolder}",
+				stopOnEntry = false,
+			},
+		}
 	end,
 }

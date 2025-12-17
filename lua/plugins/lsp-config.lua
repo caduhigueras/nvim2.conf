@@ -40,6 +40,18 @@ return { -- LSP Configuration & Plugins
 		-- If you're wondering about lsp vs treesitter, you can check out the wonderfully
 		-- and elegantly composed help section, `:help lsp-vs-treesitter`
 
+		-- Nice diagnostics defaults
+        vim.diagnostic.config({
+          virtual_text = { spacing = 2, prefix = "●" },
+          signs = true,
+          underline = true,
+          update_in_insert = false,
+          severity_sort = true,
+        })
+        vim.api.nvim_create_autocmd("CursorHold", {
+          callback = function() vim.diagnostic.open_float(nil, { focusable = false }) end,
+        })
+
 		--  This function gets run when an LSP attaches to a particular buffer.
 		--    That is to say, every time a new file is opened that is associated with
 		--    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
@@ -201,13 +213,26 @@ return { -- LSP Configuration & Plugins
 		-- for you, so that they are available from within Neovim.
 		local ensure_installed = vim.tbl_keys(servers or {})
 		vim.list_extend(ensure_installed, {
-			"stylua", -- Used to format Lua code
+			"stylua", -- Used to format Lua code,
+			"rust-analyzer", -- used by rustaceanvim
+            "lua-language-server",
+            "typescript-language-server",
+            "intelephense",
+            "html-lsp",
+            "json-lsp",
+              -- Optional extras:
+            "emmet-ls",
+            "eslint-lsp",
+            "css-lsp"
 		})
 		require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
 		require("mason-lspconfig").setup({
 			handlers = {
 				function(server_name)
+                    -- Let rustaceanvim manage Rust; just ensure the binary is installed via Mason.
+                    if server_name == "rust_analyzer" then return end
+
 					local server = servers[server_name] or {}
 					-- This handles overriding only values explicitly passed
 					-- by the server configuration above. Useful when disabling
@@ -219,34 +244,3 @@ return { -- LSP Configuration & Plugins
 		})
 	end,
 }
--- return {
---     {
---         "williamboman/mason.nvim",
---         config = function()
---             require("mason").setup()
---         end
---     },
---     {
---         "williamboman/mason-lspconfig.nvim",
---         config = function()
---             require("mason-lspconfig").setup({
---                 ensure_installed = { "lua_ls", "cssls", "cssmodules_ls", "css_variables", "html", "tsserver", "intelephense", "rust_analyzer" }
---             })
---         end
---     },
---     {
---         "neovim/nvim-lspconfig",
---         config = function()
---             local lspconfig = require("lspconfig")
---             lspconfig.lua_ls.setup({})
---             lspconfig.cssls.setup({})
---             lspconfig.html.setup({})
---             lspconfig.tsserver.setup({})
---             lspconfig.intelephense.setup({})
---             lspconfig.rust_analyzer.setup({})
---             vim.keymap.set('n', 'K', vim.lsp.buf.hover, {})
---             vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {})
---             vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, {})
---         end
---     }
--- }

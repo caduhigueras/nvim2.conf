@@ -123,6 +123,8 @@ vim.cmd([[
     augroup AutoSave
         autocmd!
         autocmd CursorHold * lua AutoSave()
+        autocmd BufLeave * lua AutoSave()
+        autocmd FocusLost * lua AutoSave()
     augroup END
 ]])
 
@@ -133,7 +135,7 @@ function AutoSave()
 end
 
 -- Time in ms to trigger the autosave
-vim.o.updatetime = 5000
+vim.o.updatetime = 2000
 
 -- Set my ideal tab Conf
 vim.cmd("set expandtab")
@@ -177,3 +179,11 @@ vim.api.nvim_set_keymap(
 )
 
 vim.keymap.set("v", "<C-c>", '"+y', { desc = "Copy to clipboard on visual mode" })
+
+-- Drag current line up and down on normal mode
+vim.keymap.set("n", "<C-S-Down>", ":m .+1<CR>==", { desc = "", noremap = true, silent = true })
+vim.keymap.set("n", "<C-S-Up>", ":m .-2<CR>==", { desc = "", noremap = true, silent = true })
+
+-- Drag selected lines up and down on visual mode
+vim.keymap.set("v", "<C-S-Down>", ":m '>+1<CR>gv=gv", { desc = "", noremap = true, silent = true })
+vim.keymap.set("v", "<C-S-Up>", ":m '<-2<CR>gv=gv", { desc = "", noremap = true, silent = true })
