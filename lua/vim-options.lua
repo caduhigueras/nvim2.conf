@@ -187,3 +187,7 @@ vim.keymap.set("n", "<C-S-Up>", ":m .-2<CR>==", { desc = "", noremap = true, sil
 -- Drag selected lines up and down on visual mode
 vim.keymap.set("v", "<C-S-Down>", ":m '>+1<CR>gv=gv", { desc = "", noremap = true, silent = true })
 vim.keymap.set("v", "<C-S-Up>", ":m '<-2<CR>gv=gv", { desc = "", noremap = true, silent = true })
+
+-- Add Tab for identation on visual mode
+vim.keymap.set("v", "<Tab>", ">gv", { noremap = true })
+vim.keymap.set("v", "<S-Tab>", "<gv", { noremap = true })
