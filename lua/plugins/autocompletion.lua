@@ -29,6 +29,7 @@ return { -- Autocompletion
 
 				ls.add_snippets("all", {
 					s("ccm", fmt("//---------- {}", { i(1) })),
+					s("tsignore", fmt("// @ts-expect-error {}", { i(1) })),
 				})
 				-- -- Console snippet for JS
 				-- ls.add_snippets("javascript", {
