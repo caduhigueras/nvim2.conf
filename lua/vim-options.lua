@@ -191,3 +191,6 @@ vim.keymap.set("v", "<C-S-Up>", ":m '<-2<CR>gv=gv", { desc = "", noremap = true,
 -- Add Tab for identation on visual mode
 vim.keymap.set("v", "<Tab>", ">gv", { noremap = true })
 vim.keymap.set("v", "<S-Tab>", "<gv", { noremap = true })
+
+vim.keymap.set("n", "E", "ea", { noremap = true })
+vim.keymap.set("n", "B", "bi", { noremap = true })
