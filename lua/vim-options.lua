@@ -194,3 +194,22 @@ vim.keymap.set("v", "<S-Tab>", "<gv", { noremap = true })
 
 vim.keymap.set("n", "E", "ea", { noremap = true })
 vim.keymap.set("n", "B", "bi", { noremap = true })
+
+-- Compare with CLipboard featuresssss
+local function diff_with_clipboard()
+	local ft = vim.bo.filetype
+	vim.cmd("vnew")
+	vim.bo.buftype = "nofile"
+	vim.bo.bufhidden = "wipe"
+	vim.bo.swapfile = false
+	vim.bo.filetype = ft
+
+	-- paste system clipboard into scratch
+	vim.cmd("silent put +")
+	vim.cmd("0delete") -- remove the extra blank line put adds at top sometimes
+
+	-- start diff in both windows
+	vim.cmd("windo diffthis")
+end
+
+vim.api.nvim_create_user_command("DiffClipboard", diff_with_clipboard, {})

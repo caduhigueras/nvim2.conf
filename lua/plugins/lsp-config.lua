@@ -41,16 +41,35 @@ return { -- LSP Configuration & Plugins
 		-- and elegantly composed help section, `:help lsp-vs-treesitter`
 
 		-- Nice diagnostics defaults
-        vim.diagnostic.config({
-          virtual_text = { spacing = 2, prefix = "●" },
-          signs = true,
-          underline = true,
-          update_in_insert = false,
-          severity_sort = true,
-        })
-        vim.api.nvim_create_autocmd("CursorHold", {
-          callback = function() vim.diagnostic.open_float(nil, { focusable = false }) end,
-        })
+		vim.diagnostic.config({
+			virtual_text = { spacing = 2, prefix = "●" },
+			signs = true,
+			underline = true,
+			update_in_insert = false,
+			severity_sort = true,
+		})
+		vim.api.nvim_create_autocmd("CursorHold", {
+			callback = function()
+				vim.diagnostic.open_float(nil, { focusable = false })
+			end,
+		})
+
+		local function enable_inlay_hints(client, bufnr)
+			if vim.lsp.inlay_hint and client.supports_method and client:supports_method("textDocument/inlayHint") then
+				-- rust-analyzer sometimes needs a tiny defer on buffer open
+				vim.defer_fn(function()
+					pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
+				end, 200)
+			end
+		end
+
+		local function toggle_inlay_hints(bufnr)
+			if not vim.lsp.inlay_hint then
+				return
+			end
+			local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr })
+			vim.lsp.inlay_hint.enable(not enabled, { bufnr = bufnr })
+		end
 
 		--  This function gets run when an LSP attaches to a particular buffer.
 		--    That is to say, every time a new file is opened that is associated with
@@ -147,6 +166,11 @@ return { -- LSP Configuration & Plugins
 						vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 					end, "[T]oggle Inlay [H]ints")
 				end
+
+				enable_inlay_hints(client, event.buf)
+				vim.keymap.set("n", "<leader>uh", function()
+					toggle_inlay_hints(event.buf)
+				end, { buffer = event.buf, desc = "Toggle inlay hints" })
 			end,
 		})
 
@@ -170,7 +194,13 @@ return { -- LSP Configuration & Plugins
 			-- clangd = {},
 			-- gopls = {},
 			-- pyright = {},
-			rust_analyzer = {},
+			rust_analyzer = {
+				inlayHints = {
+					parameterHints = { enable = true },
+					typeHints = { enable = true },
+					chainingHints = { enable = true },
+				},
+			},
 			intelephense = {},
 			tsserver = {},
 			html = {},
@@ -215,23 +245,25 @@ return { -- LSP Configuration & Plugins
 		vim.list_extend(ensure_installed, {
 			"stylua", -- Used to format Lua code,
 			"rust-analyzer", -- used by rustaceanvim
-            "lua-language-server",
-            "typescript-language-server",
-            "intelephense",
-            "html-lsp",
-            "json-lsp",
-              -- Optional extras:
-            "emmet-ls",
-            "eslint-lsp",
-            "css-lsp"
+			"lua-language-server",
+			"typescript-language-server",
+			"intelephense",
+			"html-lsp",
+			"json-lsp",
+			-- Optional extras:
+			"emmet-ls",
+			"eslint-lsp",
+			"css-lsp",
 		})
 		require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
 		require("mason-lspconfig").setup({
 			handlers = {
 				function(server_name)
-                    -- Let rustaceanvim manage Rust; just ensure the binary is installed via Mason.
-                    if server_name == "rust_analyzer" then return end
+					-- Let rustaceanvim manage Rust; just ensure the binary is installed via Mason.
+					if server_name == "rust_analyzer" then
+						return
+					end
 
 					local server = servers[server_name] or {}
 					-- This handles overriding only values explicitly passed
