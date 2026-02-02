@@ -213,3 +213,6 @@ local function diff_with_clipboard()
 end
 
 vim.api.nvim_create_user_command("DiffClipboard", diff_with_clipboard, {})
+
+-- Add shortcut keymffClipboaffClipboardurasasasaasassa
+vim.keymap.set("n", "<leader>cc", diff_with_clipboard, { noremap = true })
